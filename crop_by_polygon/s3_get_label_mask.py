@@ -5,12 +5,12 @@ import tqdm
 
 
 def get_mask_bbox(save_folder):
-    polygon_bbox = mmengine.load(save_folder + '/mask_bbox_lon_lat.json')
+    polygon_bbox = mmengine.load(save_folder + f'/mask_bbox_lon_lat_{epsg}.json')
     polygon_bbox = np.array(polygon_bbox)
     polygon_bbox = polygon_bbox / 10
     img_polygon_bbox = np.round(polygon_bbox, 0).astype(np.int32)
     polygon_bbox = img_polygon_bbox * 10
-    mmengine.dump(polygon_bbox, save_folder + '/mask_bbox_lon_lat_int.json', indent=4)
+    mmengine.dump(polygon_bbox, save_folder + f'/mask_bbox_lon_lat_int_{epsg}.json', indent=4)
     return img_polygon_bbox
 
 def geometry2imgpolygon(geometry, img_polygon_bbox):
@@ -24,14 +24,16 @@ def geometry2imgpolygon(geometry, img_polygon_bbox):
     for polygon in geometry:
         coordinates = list(polygon.exterior.coords)
         coordinates = np.array(coordinates)
-        coordinates = coordinates - img_polygon_bbox[:2] * 10
+        coordinates[:, 0] = coordinates[:, 0] - img_polygon_bbox[0] * 10
+        coordinates[:, 1] = img_polygon_bbox[1] * 10 - coordinates[:, 1]
         img_coordinates = np.round(coordinates / 10, 0).astype(np.int32)
         img_coordinates_list.append(img_coordinates)
     return img_coordinates_list
 
 
 if __name__ == '__main__':
-    polygon_file = r"E:\polygon\generated_files\data_list_32631.pkl"
+    epsg = 32632
+    polygon_file = r"E:\polygon\generated_files\data_list_{}.pkl".format(epsg)
     save_folder = r"E:\polygon\generated_files"
     mmengine.mkdir_or_exist(save_folder)
 
@@ -53,12 +55,11 @@ if __name__ == '__main__':
         idx += 1
         idx2category[idx] = category
     # save as json
-    mmengine.dump(idx2category, save_folder + '/idx2category.json', indent=4)
+    mmengine.dump(idx2category, save_folder + f'/idx2category_{epsg}.json', indent=4)
 
     label_mask = np.zeros((h, w), dtype=np.uint8)
     for idx, category in tqdm.tqdm(idx2category.items()):
-        idx += 1
         for geometry in category2bboxes[category]:
             img_polygon_list = geometry2imgpolygon(geometry, img_polygon_bbox)
             cv2.fillPoly(label_mask, img_polygon_list, idx)
-    cv2.imwrite(save_folder + '/label_mask.png', label_mask)
+    cv2.imwrite(save_folder + f'/label_mask_{epsg}.png', label_mask)

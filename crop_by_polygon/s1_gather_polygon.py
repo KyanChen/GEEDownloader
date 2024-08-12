@@ -13,9 +13,12 @@ if __name__ == '__main__':
     data = gpd.read_file(shp_file)
     print("原始坐标系:", data.crs)
 
-    imgfile = r"E:\polygon\sentinel-2_region_tiles\T31TEN_20180923T105019_B04_10m.jp2"
+    imgfile = r"E:\polygon\sentinel-2_region_tiles\L2A_T32TMM_20180201T102241_B04_10m.jp2"
     '''
+    L2A_T30UWV_20180318T110801_B04_10m.jp2 的坐标系是 EPSG:32630
     T31TEN_20180923T105019_B04_10m.jp2 的坐标系是 EPSG:32631
+    L2A_T32TMM_20180201T102241_B04_10m.jp2 的坐标系是 EPSG:32632
+    
     '''
     input_dataset = gdal.Open(imgfile)
     crs = CRS.from_wkt(input_dataset.GetProjection())

@@ -4,7 +4,8 @@ import prettytable
 
 
 if __name__ == '__main__':
-    polygon_file = r"E:\polygon\generated_files\data_list_32631.pkl"
+    epsg = 32632
+    polygon_file = r"E:\polygon\generated_files\data_list_{}.pkl".format(epsg)
     save_folder = 'E:\polygon\generated_files'
     mmengine.mkdir_or_exist(save_folder)
     data_list = mmengine.load(polygon_file)
@@ -13,8 +14,8 @@ if __name__ == '__main__':
     np_data = np.array(bbox_list)
     width = np_data[:, 2] - np_data[:, 0]
     height = np_data[:, 3] - np_data[:, 1]
-    l_lon, l_lat = np.min(np_data[:, 0]), np.max(np_data[:, 1])
-    r_lon, r_lat = np.max(np_data[:, 2]), np.min(np_data[:, 3])
+    l_lon, l_lat = np.min(np_data[:, 0]), np.max(np_data[:, 3])
+    r_lon, r_lat = np.max(np_data[:, 2]), np.min(np_data[:, 1])
 
     tab = prettytable.PrettyTable()
     tab.field_names = ['category', 'total number', 'w', 'h', 'wh', 'wr', 'hr', 'whr']
@@ -27,7 +28,7 @@ if __name__ == '__main__':
 
     bbox_lon_lat = np.array([l_lon, l_lat, r_lon, r_lat])
     print(bbox_lon_lat)
-    mmengine.dump(bbox_lon_lat, save_folder + '/mask_bbox_lon_lat.json', indent=4)
+    mmengine.dump(bbox_lon_lat, save_folder + f'/mask_bbox_lon_lat_{epsg}.json', indent=4)
 
     category2bboxes = {}
     for x in data_list:
@@ -47,7 +48,7 @@ if __name__ == '__main__':
                      np.round(num_h_less / num_total, 2), np.round(num_wh_less / num_total, 2)])
     print(tab)
     tab_txt = tab.get_string()
-    with open(save_folder + '/category_instances_info.txt', 'w') as f:
+    with open(save_folder + f'/category_instances_info_{epsg}.txt', 'w') as f:
         f.write(tab_txt)
 
 
